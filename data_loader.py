@@ -70,5 +70,5 @@ with open(os.path.dirname(__file__) + "/config.pickle", mode="wb") as f:
 # with open(os.path.dirname(__file__) + "/config.json", mode='w') as f:
 #     json.dump(asdict(config), f)
 
-with open("Just_a_new_file.txt", 'w') as f:
-    print('Where is this written', file=f)
+# with open("Just_a_new_file.txt", 'w') as f: # without the __file__, it just writes wherever you call this from.
+#     print('Where is this written', file=f)
