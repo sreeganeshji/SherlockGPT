@@ -59,6 +59,7 @@ print(f"Train set has {len(train_set)} tokens, val set has {len(val_set)} tokens
 train_set_bin = np.array(train_set, dtype=np.uint16)
 val_set_bin = np.array(val_set, dtype=np.uint16)
 
+print(f"saving trainset {train_set_bin[:10]} \n and val set {val_set_bin[:10]}")
 train_set_bin.tofile(os.path.dirname(__file__) + "/train.bin")
 val_set_bin.tofile(os.path.dirname(__file__) + "/val.bin")
 

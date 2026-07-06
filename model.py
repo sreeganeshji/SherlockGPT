@@ -5,6 +5,8 @@ from dataclasses import dataclass
 @dataclass
 class Config:
     vocab_size : int
+    batch_size: int = 32
+    context_len: int = 8
     embd_dim: int = 8
     num_heads: int = 4
     bias : bool = False
