@@ -4,10 +4,11 @@ from model import Decoder, Config
 import numpy as np
 import torch
 
-base_dir = os.path.dirname(__file__) + "/"
+base_dir = os.path.dirname(__file__)
 
 config : Config
-with open(base_dir + "config.pickle", 'rb') as f:
+config_path = os.path.join(base_dir, "config.pickle")
+with open(config_path, 'rb') as f:
     config = pickle.load(f)
     print(config)
 model = Decoder(config)
