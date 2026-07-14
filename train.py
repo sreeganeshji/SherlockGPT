@@ -17,11 +17,12 @@ print(model)
 # Apparently we save it as uint16 to save storage space locally, but then cast to int64.
 # So the embedding() didn't work with even unit16, int16, but only with int64, and int32
 # This is because the kernel is implemented for these standard types.
-with open(base_dir + "train.bin", 'r') as f:
+train_bin_path = os.path.join(base_dir, "train.bin")
+with open(train_bin_path, 'r') as f:
     train_set = np.fromfile(f, dtype=np.uint16).astype(dtype=np.int64) # np.array(f.read())
     print(f"train set try1: {train_set[:10]}, size: {len(train_set)}")
 
-train_set = np.fromfile(base_dir + "train.bin", dtype=np.uint16).astype(dtype=np.int64)
+train_set = np.fromfile(train_bin_path, dtype=np.uint16).astype(dtype=np.int64)
 print(f"train set try2: {train_set[:10]}, size {len(train_set)}")
 
 # WHY I'M KEEPING THIS!
