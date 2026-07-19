@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch
 import numpy as np
 from dataclasses import dataclass
+from torch.nn import functional as F
 
 @dataclass
 class Config:
@@ -101,5 +102,11 @@ class Decoder(nn.Module):
         sum to 1.
         '''
 
+        o = torch.ones_like(temp_n)
+        o = torch.tril(o)
+        masked = temp_n.masked_fill(o == 0, float("-inf"))
+        print(f"started with o{o[0,0,:3,:3]} \n masked:{masked[0, 0, :3, :3]}")
+        masked_n = F.softmax(masked, 1)
+        print(f"normalized { masked_n[0, 0, :3, :3]}")
         pass
 

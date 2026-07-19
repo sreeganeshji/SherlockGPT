@@ -63,3 +63,5 @@ for itr in range(num_iters):
     y_bar = model(x)
 
     print(f"received model output: {y_bar.shape}")
+
+    pass
