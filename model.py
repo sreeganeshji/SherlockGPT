@@ -41,6 +41,7 @@ class Decoder(nn.Module):
         '''
 
         self.lin_kqv = nn.Linear(config.embd_dim, config.embd_dim * 3, bias=config.bias)
+        self.lin_output = nn.Linear(config.embd_dim, config.embd_dim, config.bias)
 
 
     def forward(self, x: torch.Tensor):
@@ -83,7 +84,7 @@ class Decoder(nn.Module):
         print(f"values at [0,0,:3, :3] {temp[0, 0, :3, :3]}")
 
         #normalizing
-        n_dim = C // self.num_heads
+        n_dim = C // self.num_heads # Or the last dim of k or q k.shape(-1)
         norm_factor = torch.sqrt(torch.tensor(n_dim))
         temp_n = temp / norm_factor # if we don't do this, the softmax would be spiky
         print(f"after normalizing with {norm_factor}: {temp_n[0, 0, :3, :3]} \n a factor of {(temp/temp_n)[0, 0, :3, :3]}")
@@ -106,7 +107,43 @@ class Decoder(nn.Module):
         o = torch.tril(o)
         masked = temp_n.masked_fill(o == 0, float("-inf"))
         print(f"started with o{o[0,0,:3,:3]} \n masked:{masked[0, 0, :3, :3]}")
-        masked_n = F.softmax(masked, 1)
-        print(f"normalized { masked_n[0, 0, :3, :3]}")
+        masked_n = F.softmax(masked, -1)
+        print(f"softmax { masked_n[0, 0, :3, :3]}")
+
+        '''
+        7/19
+        We have the causal attention matrix.Next thing is to multipy with values. so we have:
+        softmax(q*k.T), but then we need to divide it by the dimensions. Okay so the dims should be 
+        done before the softmax. We've already done this, so we are good to multiply with value matrix
+        '''
+
+        attn = masked_n @ v # (B, num_h, T, T) @ (B, num_h, T, C)
+
+        # we can apply dropout here
+
+
+        # This concludes the attn layer. We can proceed to the linear layer. Then we concat the values
+        # to get (B, T, num_h * C)
+        # attn_cat = attn.transpose(1,2).view(B, T, C)
+        '''
+        The above like gives the following error:
+        view size is not compatible with input tensor's size and stride (at least one dimension spans across two contiguous subspaces). Use .reshape(...) instead.
+        '''
+        # attn_cat = attn.transpose(1,2).reshape(B, T, C)
+        '''
+        View returns if possible, i.e. if the memory layout permits it.
+        Reshape() tries to return a view but if it can't, it copies it over.
+        Contiguous() returns a tensor stored in contiguous memory, and copying if needed.
+        '''
+        # equivalently
+        attn_cat = attn.transpose(1, 2).contiguous().view(B, T, C)
+
+        print(f"multipying with v: head_0: {attn[0, 0, 0, :3]}, head_1:{attn[0, 1, 0, :3]}, head2: {attn[0, 2, 0, :3]}"
+              f"\n then concating {attn_cat[0,0,:9]}")
+        
+        '''
+        What's next? We have one block of attention. We can have this be a single block, then replicate it a few times, and
+        connect to the further linear layers to get the pred, softmax, etc. I still need to add the resnet, and dropout.
+        '''
         pass
 
